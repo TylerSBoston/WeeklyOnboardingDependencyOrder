@@ -38,58 +38,7 @@ public class DependencyOrganizer {
 		finalOrder.clear();
 		clearAllNodes();
 		buildMap(projects,bootOrder);
-		
-		
-		floatingNodes.forEach((key,value) ->{
-			finalOrder.add(value);
-			clearedNodes.put(key, value);
-			unclearedNodes.remove(key);
-		});
-		
-		startNodes.forEach((key,value) ->{
-			finalOrder.add(value);
-			clearedNodes.put(key, value);
-			unclearedNodes.remove(key);
-		});
-		
-		
-		// checks if program failed to find a valid next project to place
-		progress = true;
-		while(progress)
-		{
-			progress = false;
-			// logic to find available projects to add to the order
-			// may be slow with excessively large load orders with many dependencies
-			pendingNodes.forEach((key,value) ->{
-				pass = true;
-				value.pastNodes.forEach((innerKey,innerValue) ->{
-					if(unclearedNodes.containsKey(innerKey))
-					{
-						pass = false;
-					}
-				});
-				if(pass && unclearedNodes.containsKey(key))
-				{
-					progress = true;
-					finalOrder.add(value);
-					clearedNodes.put(key,value);
-					unclearedNodes.remove(key);					
-				}
-			});	
-
-			if(clearedNodes.size() == projects.size())
-			{
-				clearAllNodes();
-				return printOrder();
-			}
-			else if(progress == false)
-			{
-				throw new InvalidOrderException();
-			}
-		}
-		// unreachable, here for formality
-		clearAllNodes();
-		return null;
+		return calculateOrder();
 	}
 	
 	// builds node map to be used to build a valid order
@@ -179,7 +128,59 @@ public class DependencyOrganizer {
 		return returnOrder;
 	}
 	
-	
+	private String calculateOrder() throws InvalidOrderException 
+	{
+		floatingNodes.forEach((key,value) ->{
+			finalOrder.add(value);
+			clearedNodes.put(key, value);
+			unclearedNodes.remove(key);
+		});
+		
+		startNodes.forEach((key,value) ->{
+			finalOrder.add(value);
+			clearedNodes.put(key, value);
+			unclearedNodes.remove(key);
+		});
+		
+		
+		// checks if program failed to find a valid next project to place
+		progress = true;
+		while(progress)
+		{
+			progress = false;
+			// logic to find available projects to add to the order
+			// may be slow with excessively large load orders with many dependencies
+			pendingNodes.forEach((key,value) ->{
+				pass = true;
+				value.pastNodes.forEach((innerKey,innerValue) ->{
+					if(unclearedNodes.containsKey(innerKey))
+					{
+						pass = false;
+					}
+				});
+				if(pass && unclearedNodes.containsKey(key))
+				{
+					progress = true;
+					finalOrder.add(value);
+					clearedNodes.put(key,value);
+					unclearedNodes.remove(key);					
+				}
+			});	
+
+			if(unclearedNodes.size() == 0)
+			{
+				clearAllNodes();
+				return printOrder();
+			}
+			else if(progress == false)
+			{
+				throw new InvalidOrderException();
+			}
+		}
+		
+		//unreachable
+		return null;
+	}
 	
 	
 }
