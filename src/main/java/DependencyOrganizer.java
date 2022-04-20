@@ -89,7 +89,8 @@ public class DependencyOrganizer {
 		floatingNodes.clear();
 		allNodes.clear();
 		clearedNodes.clear();
-		unclearedNodes.clear();		
+		unclearedNodes.clear();	
+		finalOrder.clear();
 	}
 	
 	
@@ -109,13 +110,12 @@ public class DependencyOrganizer {
 			}
 			
 		}
-		finalOrder.clear();
+		clearAllNodes();
 		return returnOrder;
 	}
 	
 	private String calculateOrder() throws InvalidOrderException 
 	{
-		finalOrder.clear();
 		floatingNodes.forEach((key,value) ->{
 			finalOrder.add(value);
 			clearedNodes.put(key, value);
@@ -147,7 +147,6 @@ public class DependencyOrganizer {
 
 			if(unclearedNodes.size() == 0)
 			{
-				clearAllNodes();
 				return printOrder();
 			}
 			else if(progress == false)
