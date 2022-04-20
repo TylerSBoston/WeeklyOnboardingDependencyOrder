@@ -16,9 +16,9 @@ public class DependencyOrganizer {
 		
 	}
 	//feels safer to use strings as keys than with a hashset
-	private HashMap<String,ProjectNode> clearedNodes = new HashMap<String,ProjectNode>(); ; // nodes in which all previous nodes are included
-	private HashMap<String,ProjectNode> pendingNodes = new HashMap<String,ProjectNode>(); ; // nodes which hasn't had a previous nodes cleared
-	private HashMap<String,ProjectNode> floatingNodes = new HashMap<String,ProjectNode>(); ; // nodes with no future or past nodes;
+	private HashMap<String,ProjectNode> clearedNodes = new HashMap<String,ProjectNode>(); ; // nodes in which have been ordered
+	private HashMap<String,ProjectNode> pendingNodes = new HashMap<String,ProjectNode>(); ; // nodes which hasn't had a previous nodes cleared/ordered
+	private HashMap<String,ProjectNode> floatingNodes = new HashMap<String,ProjectNode>(); ; // nodes with no past nodes;
 	private HashMap<String,ProjectNode> allNodes = new HashMap<String,ProjectNode>(); // for checking if a node exists
 	private HashMap<String,ProjectNode> unclearedNodes = new HashMap<String,ProjectNode>(); ; // nodes not yet ordered
  	private LinkedList<ProjectNode> finalOrder = new LinkedList<ProjectNode>(); //holds final order to be compiled into a single string 
@@ -34,8 +34,6 @@ public class DependencyOrganizer {
 	// again probably not simplist way, but should always work
 	public String generateBootOrder(List<String> projects, String[][] bootOrder) throws InvalidOrderException, InvalidProjectException, DuplicateProjectException
 	{
-		finalOrder.clear();
-		clearAllNodes();
 		buildMap(projects,bootOrder);
 		return calculateOrder();
 	}
@@ -43,6 +41,7 @@ public class DependencyOrganizer {
 	// builds node map to be used to build a valid order
 	private void buildMap(List<String> projects, String[][] bootOrder) throws InvalidProjectException, DuplicateProjectException
 	{
+		clearAllNodes();
 		for(String s : projects)
 		{
 			ProjectNode project = new ProjectNode(s);
@@ -86,13 +85,11 @@ public class DependencyOrganizer {
 	
 	private void clearAllNodes()
 	{
-
 		pendingNodes.clear();
 		floatingNodes.clear();
 		allNodes.clear();
 		clearedNodes.clear();
-		unclearedNodes.clear();
-		
+		unclearedNodes.clear();		
 	}
 	
 	
@@ -112,11 +109,13 @@ public class DependencyOrganizer {
 			}
 			
 		}
+		finalOrder.clear();
 		return returnOrder;
 	}
 	
 	private String calculateOrder() throws InvalidOrderException 
 	{
+		finalOrder.clear();
 		floatingNodes.forEach((key,value) ->{
 			finalOrder.add(value);
 			clearedNodes.put(key, value);
