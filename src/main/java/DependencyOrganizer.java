@@ -16,7 +16,6 @@ public class DependencyOrganizer {
 		
 	}
 	//feels safer to use strings as keys than with a hashset
-	private HashMap<String,ProjectNode> startNodes = new HashMap<String,ProjectNode>(); ; // no previous nodes
 	private HashMap<String,ProjectNode> clearedNodes = new HashMap<String,ProjectNode>(); ; // nodes in which all previous nodes are included
 	private HashMap<String,ProjectNode> pendingNodes = new HashMap<String,ProjectNode>(); ; // nodes which hasn't had a previous nodes cleared
 	private HashMap<String,ProjectNode> floatingNodes = new HashMap<String,ProjectNode>(); ; // nodes with no future or past nodes;
@@ -63,13 +62,7 @@ public class DependencyOrganizer {
 		{
 			if(allNodes.containsKey(dependency[0]) && allNodes.containsKey(dependency[1]))
 			{
-				// moves nodes to correct type/ builds dependency map
-				// dependency string/project
-				if(floatingNodes.containsKey(dependency[0]))
-				{
-					startNodes.put(dependency[0], floatingNodes.get(dependency[0]));
-					floatingNodes.remove(dependency[0]);
-				}
+
 				
 				//dependent string/project
 				if(floatingNodes.containsKey(dependency[1]))
@@ -78,12 +71,6 @@ public class DependencyOrganizer {
 					pendingNodes.put(dependency[1], floatingNodes.get(dependency[1]));
 					floatingNodes.remove(dependency[1]);
 					
-				}
-				else if(startNodes.containsKey(dependency[1]))
-				{
-					startNodes.get(dependency[1]).pastNodes.put(dependency[0],new ProjectNode(dependency[0]));
-					pendingNodes.put(dependency[1], startNodes.get(dependency[1]));
-					startNodes.remove(dependency[1]);
 				}
 				else if(pendingNodes.containsKey(dependency[1]))
 				{
@@ -99,7 +86,7 @@ public class DependencyOrganizer {
 	
 	private void clearAllNodes()
 	{
-		startNodes.clear();
+
 		pendingNodes.clear();
 		floatingNodes.clear();
 		allNodes.clear();
@@ -134,15 +121,7 @@ public class DependencyOrganizer {
 			finalOrder.add(value);
 			clearedNodes.put(key, value);
 			unclearedNodes.remove(key);
-		});
-		
-		startNodes.forEach((key,value) ->{
-			finalOrder.add(value);
-			clearedNodes.put(key, value);
-			unclearedNodes.remove(key);
-		});
-		
-		
+		});	
 		// checks if program failed to find a valid next project to place
 		progress = true;
 		while(progress)
@@ -176,11 +155,8 @@ public class DependencyOrganizer {
 			{
 				throw new InvalidOrderException();
 			}
-		}
-		
+		}		
 		//unreachable
 		return null;
 	}
-	
-	
 }
