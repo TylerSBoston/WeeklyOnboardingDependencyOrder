@@ -27,6 +27,7 @@ public class DependencyOrganizer {
  	// here for scope, used by lambda forEach loops
 	private boolean pass; // checks if previous nodes are 'cleared'
 	private boolean progress; // checks if the node order got current in the previous loop
+	private LinkedList<String> markedForRemoval = new LinkedList<String>(); // removed cleared pending Nodes from loop, speeds up loop
 	
 	
 	// can be overloaded to take hashsets/maps as well only including lists for now.
@@ -42,6 +43,7 @@ public class DependencyOrganizer {
 	private void buildMap(List<String> projects, String[][] bootOrder) throws InvalidProjectException, DuplicateProjectException
 	{
 		clearAllNodes();
+		// moves all projects to nodes
 		for(String s : projects)
 		{
 			ProjectNode project = new ProjectNode(s);
@@ -57,12 +59,11 @@ public class DependencyOrganizer {
 			}
 		}
 		
+		// adds all dependencies to nodes, orginizes nodes
 		for(String[] dependency : bootOrder)
 		{
 			if(allNodes.containsKey(dependency[0]) && allNodes.containsKey(dependency[1]))
-			{
-
-				
+			{	
 				//dependent string/project
 				if(floatingNodes.containsKey(dependency[1]))
 				{
@@ -141,9 +142,16 @@ public class DependencyOrganizer {
 					progress = true;
 					finalOrder.add(value);
 					clearedNodes.put(key,value);
-					unclearedNodes.remove(key);					
+					unclearedNodes.remove(key);	
+					markedForRemoval.add(key);
 				}
 			});	
+			// cant do this in its own foreach so....
+			for(String s : markedForRemoval)
+			{
+				pendingNodes.remove(s);
+			}
+			markedForRemoval.clear();
 
 			if(unclearedNodes.size() == 0)
 			{
